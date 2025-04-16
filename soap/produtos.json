@@ -1,0 +1,21 @@
+
+[
+  {
+    "nome": "Caneta",
+    "preco": 1.5,
+    "categoria": "Papelaria",
+    "em_stock": 20
+  },
+  {
+    "nome": "Caderno",
+    "preco": 3.0,
+    "categoria": "Papelaria",
+    "em_stock": 15
+  },
+  {
+    "nome": "Monitor",
+    "preco": 120.0,
+    "categoria": "Eletrónica",
+    "em_stock": 8
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "nome": "Anavar",
+    "preco": 55.0,
+    "categoria": "Oral",
+    "em_stock": true
+  },
+  {
+    "nome": "Trembolona",
+    "preco": 70.0,
+    "categoria": "Injetável",
+    "em_stock": false
+  }
+]
+

@@ -1,0 +1,15 @@
+<produtos>
+  <produto>
+    <nome>Caneta</nome>
+    <preco>1.5</preco>
+    <categoria>Papelaria</categoria>
+    <em_stock>20</em_stock>
+  </produto>
+  <produto>
+    <nome>Caderno</nome>
+    <preco>3.0</preco>
+    <categoria>Papelaria</categoria>
+    <em_stock>15</em_stock>
+  </produto>
+</produtos>
+
