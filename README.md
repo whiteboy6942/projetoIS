@@ -135,7 +135,7 @@ Observações
 
 ---
 
-Autor
+Feito por:
 
 Bernardo Cebola — Projeto para a UC de Integração de Sistemas 
 
