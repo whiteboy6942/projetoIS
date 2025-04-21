@@ -1,0 +1,71 @@
+import requests
+
+# URL do servidor GraphQL
+URL = "http://192.168.246.38:5002/graphql"
+
+# Função para listar esteroides
+def listar_esteroides():
+    query = """
+    query {
+        esteroides {
+            nome
+            preco
+            categoria
+            em_stock
+        }
+    }
+    """
+
+    response = requests.post(URL, json={'query': query})
+    if response.status_code == 200:
+        data = response.json()['data']['esteroides']
+        for e in data:
+            print(f"- {e['nome']} ({e['categoria']}) - {e['preco']}€ - Em stock: {e['em_stock']}")
+    else:
+        print("Erro ao consultar esteroides.")
+
+# Função para adicionar um novo esteroide
+def adicionar_esteroide():
+    nome = input("Nome: ")
+    preco = float(input("Preço: "))
+    categoria = input("Categoria: ")
+    em_stock = input("Está em stock? (s/n): ").lower() == 's'
+
+    mutation = f"""
+    mutation {{
+        adicionarEsteroide(
+            nome: "{nome}",
+            preco: {preco},
+            categoria: "{categoria}",
+            em_stock: {str(em_stock).lower()}
+        ) {{
+            nome
+            preco
+        }}
+    }}
+    """
+
+    response = requests.post(URL, json={'query': mutation})
+    if response.status_code == 200:
+        print("✔️ Esteroide adicionado com sucesso!")
+    else:
+        print("Erro ao adicionar esteroide.")
+
+# Menu interativo
+if __name__ == "__main__":
+    while True:
+        print("\n=== CLIENTE GRAPHQL ===")
+        print("1. Listar esteroides")
+        print("2. Adicionar esteroide")
+        print("0. Sair")
+
+        opcao = input("Escolha uma opção: ")
+
+        if opcao == '1':
+            listar_esteroides()
+        elif opcao == '2':
+            adicionar_esteroide()
+        elif opcao == '0':
+            break
+        else:
+            print("Opção inválida.")
