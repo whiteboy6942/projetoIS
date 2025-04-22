@@ -1,141 +1,84 @@
-Projeto de Serviços Web Multitecnologia
 
-Este repositório contém a implementação de um sistema de catálogo de esteroides anabolizantes utilizando diferentes tecnologias de serviços web: REST, SOAP, gRPC e GraphQL.
 
----
+Este é um projeto realizado na UC de IS que implementa um sistema de gestão de produtos (esteroides) utilizando várias tecnologias de comunicação: REST, SOAP, gRPC e GraphQL.
 
- Estrutura do Projeto
+## Tecnologias Usadas
+- Python 3.12
+- Flask
+- Spyne (SOAP)
+- gRPC
+- Graphene (GraphQL)
+- XML / JSON para importação e exportação de dados
 
+## Estrutura
 ```
 projeto/
-├── cliente_graphql.py
-├── cliente_rest.py
-├── cliente_soap.py
-├── produtos.json
-├── produtos.xml
-├── schema.py
-├── schema.json
-├── server_graphql.py
-├── server_rest.py
-├── server_soap.py
-├── app.py
-├── grpc/
-│   └── ...
-├── soap/
-│   └── ...
 ├── rest/
-│   └── app.py
-└── graphql/
-    └── server_graphql.py
+│   ├── server_rest.py
+│   └── produtos.json / produtos.xml
+├── soap/
+│   ├── server_soap.py
+│   ├── produtos.xml / schema.xsd
+├── grpc/
+│   ├── server_grpc.py
+│   └── esteroides.proto
+├── graphql/
+│   ├── server_graphql.py
+│   └── schema.py
+├── cliente/
+    ├── cliente_rest.py
+    ├── cliente_soap.py
+    ├── cliente_grpc.py
+    ├── cliente_graphql.py
+    └── cliente_import_export.py
 ```
 
 ---
 
-Tecnologias Utilizadas
+## Funções REST
 
-- REST com Flask
-- SOAP com Spyne
-- GraphQL com Flask + Graphene
-- gRPC com `grpcio` e `protobuf`
+### Importação JSON
+- **Rota**: `/importar/json`
+- **Método**: `POST`
+- **Função**: Recebe um ficheiro JSON e guarda os dados no servidor.
 
----
+### Exportação JSON
+- **Rota**: `/exportar/json`
+- **Método**: `GET`
+- **Função**: Devolve os dados do servidor num ficheiro JSON para backup.
 
- Funcionalidades
+### Importação XML
+- **Rota**: `/importar/xml`
+- **Método**: `POST`
+- **Função**: Recebe um ficheiro XML e guarda os dados no servidor.
 
- REST
+### Exportação XML
+- **Rota**: `/exportar/xml`
+- **Método**: `GET`
+- **Função**: Devolve os dados atuais do servidor num ficheiro XML para backup.
 
-- Listar esteroides
-- Adicionar esteroide
-- Atualizar esteroide
-- Remover esteroide
-- Importação/exportação em JSON e XML
-
-SOAP
-
-- Listagem e adição de esteroides com validação via XSD
-
-GraphQL
-
-- Query de esteroides
-- Mutation para adicionar
-
- gRPC
-
-- Listagem e adição de esteroides
-
----
-Como Executar
-
- 1. Ativar ambiente virtual
-
-bash
-source venv-rest/bin/activate  # ou venv-graphql, etc.
-
-
-2. Executar o servidor REST
-
-bash
-python rest/app.py
-
-
- 3. Testar com curl
-
-bash
-curl http://localhost:5000/esteroides
-
-
- 4. Executar servidor GraphQL
-
-bash
-python graphql/server_graphql.py
-
-
-A interface interativa GraphiQL estará acessível em:
-
-
-http://localhost:5002/graphql
-
-
-5. Executar servidor SOAP
-
-bash
-python server_soap.py
-
-
-6. Executar servidor gRPC
-
-bash
-python grpc/server_grpc.py
-
-
-
-
- Importação de Dados
-
- JSON
-
-bash
-curl -X POST http://localhost:5000/importar/json
-
- XML
-
-bash
-curl -X POST http://localhost:5000/importar/xml
-```
+O cliente `cliente_import_export.py` permite interagir com estas funções, escolhendo entre importar e exportar dados.
 
 ---
 
-Observações
+## SOAP
+- A função `adicionar_produto` permite validar dados com `schema.xsd` antes de guardar no `produtos.xml`.
+- O cliente usa a biblioteca `suds` para fazer chamadas ao servidor.
 
-- Todos os servidores escutam localmente nas suas respetivas portas:
-  - REST: `5000`
-  - GraphQL: `5002`
-  - SOAP: `8000`
-  - gRPC: `50051`
+## gRPC
+- Define serviços no ficheiro `.proto`
+- Suporta adicionar e listar produtos
+
+## GraphQL
+- Permite queries e mutations para gerir esteroides
+- Usa o cliente `requests` para enviar queries ao endpoint `/graphql`
 
 ---
 
-Feito por:
+## Como executar
+1. Ativar o ambiente virtual correspondente (ex: `source venv-rest/bin/activate`)
+2. Executar o servidor (ex: `python3 server_rest.py`)
+3. Abrir o cliente correspondente
+4. Interagir com o sistema (listar, adicionar, importar/exportar)
 
-Bernardo Cebola — Projeto para a UC de Integração de Sistemas 
 
