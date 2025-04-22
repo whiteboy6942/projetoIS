@@ -1,4 +1,3 @@
-
 import requests
 
 # URL base da API REST
