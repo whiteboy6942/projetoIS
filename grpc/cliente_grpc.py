@@ -11,7 +11,7 @@ def listar_esteroides():
     resposta = stub.ListarEsteroides(esteroides_pb2.Vazio())
     print("\n--- Esteroides no servidor ---")
     for e in resposta.esteroides:
-        print(f"- {e.nome} ({e.categoria}) - {e.preco}€ - Em stock: {e.emStock}")
+        print(f"- {e.nome} ({e.categoria}) - {e.preco}€ - Em stock: {e.em_stock}")
 
 # Adiciona um novo esteroide ao servidor
 def adicionar_esteroide():
