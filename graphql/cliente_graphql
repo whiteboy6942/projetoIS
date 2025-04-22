@@ -11,7 +11,7 @@ def listar_esteroides():
             nome
             preco
             categoria
-            em_stock
+            emStock
         }
     }
     """
@@ -20,7 +20,7 @@ def listar_esteroides():
     if response.status_code == 200:
         data = response.json()['data']['esteroides']
         for e in data:
-            print(f"- {e['nome']} ({e['categoria']}) - {e['preco']}€ - Em stock: {e['em_stock']}")
+            print(f"- {e['nome']} ({e['categoria']}) - {e['preco']}€ - Em stock: {e['emStock']}")
     else:
         print("Erro ao consultar esteroides.")
 
@@ -29,7 +29,7 @@ def adicionar_esteroide():
     nome = input("Nome: ")
     preco = float(input("Preço: "))
     categoria = input("Categoria: ")
-    em_stock = input("Está em stock? (s/n): ").lower() == 's'
+    emStock = input("Está em stock? (s/n): ").lower() == 's'
 
     mutation = f"""
     mutation {{
@@ -37,7 +37,7 @@ def adicionar_esteroide():
             nome: "{nome}",
             preco: {preco},
             categoria: "{categoria}",
-            em_stock: {str(em_stock).lower()}
+            emStock: {str(emStock).lower()}
         ) {{
             nome
             preco
