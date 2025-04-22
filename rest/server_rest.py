@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 import json
 import xml.etree.ElementTree as ET
 
@@ -43,7 +43,7 @@ def remover_esteroide(nome):
 def importar_json():
     try:
         with open("produtos.json", "r") as f:
-            dados = json.load(f)
+                        dados = json.load(f)
             esteroides.extend(dados)
         return jsonify({"mensagem": "Dados importados com sucesso a partir de JSON."}), 200
     except Exception as e:
@@ -68,7 +68,34 @@ def importar_xml():
         return jsonify({"mensagem": "Dados importados com sucesso a partir de XML."}), 200
     except Exception as e:
         return jsonify({"erro": f"Erro ao importar XML: {str(e)}"}), 500
+@app.route("/exportar/json", methods=["GET"])
+def exportar_json():
+    with open("produtos.json") as f:
+        produtos = json.load(f)
+    return jsonify(produtos)
+
+@app.route("/exportar/xml", methods=["GET"])
+def exportar_xml():
+    try:
+        with open("produtos.json", "r", encoding="utf-8") as f:
+            produtos = json.load(f)
+
+        root = ET.Element("produtos")
+        for p in produtos:
+            produto_elem = ET.SubElement(root, "produto")
+            for chave, valor in p.items():
+                ET.SubElement(produto_elem, chave).text = str(valor)
+
+        xml_str = ET.tostring(root, encoding="utf-8")
+        return Response(xml_str, mimetype="application/xml")
+
+    except Exception as e:
+        print("🛑 ERRO NO EXPORTAR XML:", e)
+        return {"erro": str(e)}, 500
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
+
 
