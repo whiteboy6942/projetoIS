@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package esteroides;
+
+service EsteroidesService {
+  rpc ListarEsteroides (Vazio) returns (ListaEsteroides);
+  rpc AdicionarEsteroide (Esteroide) returns (RespostaMensagem);
+}
+
+message Vazio {}
+
+message Esteroide {
+  string nome = 1;
+  float preco = 2;
+  string categoria = 3;
+  bool em_stock = 4;
+}
+
+message ListaEsteroides {
+  repeated Esteroide esteroides = 1;
+}
+
+message RespostaMensagem {
+  string mensagem = 1;
+}
+
+
+
+
