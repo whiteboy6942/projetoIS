@@ -1,105 +1,126 @@
-from spyne import Application, rpc, ServiceBase, Unicode, Float, Boolean, Array
-from spyne.protocol.soap import Soap11
-from spyne.server.wsgi import WsgiApplication
+# Importação de bibliotecas necessárias
+from flask import Flask, jsonify, request, Response
+import json
 import xml.etree.ElementTree as ET
-import xmlschema
+from xml.dom import minidom  
 
-XSD_FILE = "schema.xsd"
-XML_FILE = "produtos.xml"
+# Criação da aplicação Flask
+app = Flask(__name__)
 
-# Função auxiliar para carregar produtos do ficheiro XML
-def carregar_produtos():
+# Base de dados simulada (inicial) com esteroides
+esteroides = [
+    {"nome": "Dianabol", "preco": 45.0, "categoria": "Oral", "em_stock": True},
+    {"nome": "Deca-Durabolin", "preco": 60.0, "categoria": "Injetável", "em_stock": False},
+    {"nome": "Anavar", "preco": 55.0, "categoria": "Oral", "em_stock": True},
+    {"nome": "Winstrol", "preco": 50.0, "categoria": "Oral", "em_stock": True},
+    {"nome": "Trembolona", "preco": 70.0, "categoria": "Injetável", "em_stock": False},
+    {"nome": "Sustanon 250", "preco": 65.0, "categoria": "Injetável", "em_stock": True}
+]
+
+# ROTAS PRINCIPAIS (CRUD)
+
+
+# GET - Lista esteroides
+@app.route("/esteroides", methods=["GET"])
+def listar_esteroides():
+    return jsonify(esteroides)
+
+#  POST - Adiciona novo esteroide
+@app.route("/esteroides", methods=["POST"])
+def adicionar_esteroide():
+    novo = request.get_json()
+    esteroides.append(novo)
+    return jsonify({"mensagem": f"Esteroide '{novo['nome']}' adicionado com sucesso!"}), 200
+
+# PUT - Atualiza esteroide por nome
+@app.route("/esteroides/<string:nome>", methods=["PUT"])
+def atualizar_esteroide(nome):
+    dados = request.get_json()
+    for e in esteroides:
+        if e["nome"].lower() == nome.lower():
+            e.update(dados)
+            return jsonify({"mensagem": f"Esteroide '{nome}' atualizado com sucesso."}), 200
+    return jsonify({"erro": f"Esteroide '{nome}' não encontrado."}), 404
+
+# DELETE - Remove esteroide por nome
+@app.route("/esteroides/<string:nome>", methods=["DELETE"])
+def remover_esteroide(nome):
+    global esteroides
+    esteroides = [e for e in esteroides if e["nome"].lower() != nome.lower()]
+    return jsonify({"mensagem": f"Esteroide '{nome}' removido com sucesso."}), 200
+
+
+# IMPORTAÇÃO DE DADOS
+
+
+# Importar dados do ficheiro produtos.json (lado do servidor)
+@app.route("/importar/json", methods=["POST"])
+def importar_json():
     try:
-        tree = ET.parse(XML_FILE)
+        with open("produtos.json", "r") as f:
+            dados = json.load(f)
+        esteroides.extend(dados)
+        return jsonify({"mensagem": "Dados importados com sucesso a partir de JSON."}), 200
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao importar JSON: {str(e)}"}), 500
+
+# Importar dados do ficheiro produtos.xml (lado do servidor)
+@app.route("/importar/xml", methods=["POST"])
+def importar_xml():
+    try:
+        tree = ET.parse("produtos.xml")
         root = tree.getroot()
-        produtos = []
-
-        for p in root.findall("produto"):
-            produtos.append({
-                "nome": p.find("nome").text,
-                "preco": p.find("preco").text,
-                "categoria": p.find("categoria").text,
-                "em_stock": p.find("em_stock").text
+        for elem in root.findall("produto"):
+            nome = elem.find("nome").text
+            preco = float(elem.find("preco").text)
+            categoria = elem.find("categoria").text
+            em_stock = elem.find("em_stock").text.lower() == "true"
+            esteroides.append({
+                "nome": nome,
+                "preco": preco,
+                "categoria": categoria,
+                "em_stock": em_stock
             })
+        return jsonify({"mensagem": "Dados importados com sucesso a partir de XML."}), 200
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao importar XML: {str(e)}"}), 500
 
-        return produtos
-    except FileNotFoundError:
-        return []
 
-# Serviço SOAP com métodos do catálogo
-class CatalogoService(ServiceBase):
+# EXPORTAÇÃO DE DADOS
 
-    @rpc(_returns=Array(Unicode))
-    def listar_produtos(ctx):
-        produtos = carregar_produtos()
-        return [f'{p["nome"]} | {p["preco"]}€ | {p["categoria"]} | Stock: {p["em_stock"]}' for p in produtos]
 
-    @rpc(Unicode, _returns=Unicode)
-    def procurar_produto(ctx, nome):
-        produtos = carregar_produtos()
+# ✅ Exportar os dados atuais como JSON
+@app.route("/exportar/json", methods=["GET"])
+def exportar_json():
+    return jsonify(esteroides)
+
+# ✅ Exportar os dados atuais como XML, bem formatado
+@app.route("/exportar/xml", methods=["GET"])
+def exportar_xml():
+    try:
+        produtos = esteroides
+
+        root = ET.Element("produtos")
         for p in produtos:
-            if p["nome"] == nome:
-                return f'{p["nome"]} | {p["preco"]}€ | {p["categoria"]} | Stock: {p["em_stock"]}'
-        return "Produto não encontrado."
+            produto_elem = ET.SubElement(root, "produto")
+            for chave, valor in p.items():
+                ET.SubElement(produto_elem, chave).text = str(valor)
 
-    @rpc(Unicode, Float, Unicode, Boolean, _returns=Unicode)
-    def adicionar_produto(ctx, nome, preco, categoria, em_stock):
-        schema = xmlschema.XMLSchema(XSD_FILE)
+        rough_string = ET.tostring(root, 'utf-8')
+        reparsed = minidom.parseString(rough_string)
+        pretty_xml = reparsed.toprettyxml(indent="  ")
 
-        novo = ET.Element("produto")
-        ET.SubElement(novo, "nome").text = nome
-        ET.SubElement(novo, "preco").text = str(preco)
-        ET.SubElement(novo, "categoria").text = categoria
-        ET.SubElement(novo, "em_stock").text = "1" if em_stock else "0"
+        return Response(pretty_xml, mimetype='application/xml')
 
-        temp_root = ET.Element("produtos")
-        temp_root.append(novo)
+    except Exception as e:
+        print("🛑 ERRO NO EXPORTAR XML:", e)
+        return {"erro": str(e)}, 500
 
-        xml_temp = ET.tostring(temp_root, encoding="unicode")
-        print("DEBUG - XML gerado para validação:")
-        print(xml_temp)
 
-        if not schema.is_valid(ET.tostring(temp_root, encoding="unicode")):
-            return "Erro: Produto inválido segundo o XSD."
+# EXECUTA A APLICAÇÃO
 
-        try:
-            tree = ET.parse(XML_FILE)
-            root = tree.getroot()
-        except FileNotFoundError:
-            root = ET.Element("produtos")
-            tree = ET.ElementTree(root)
-
-        root.append(novo)
-        tree.write(XML_FILE, encoding="utf-8", xml_declaration=True)
-        return "Produto adicionado com sucesso."
-
-    @rpc(Unicode, _returns=Unicode)
-    def remover_produto(ctx, nome):
-        try:
-            tree = ET.parse(XML_FILE)
-            root = tree.getroot()
-        except FileNotFoundError:
-            return "Ficheiro XML não encontrado."
-
-        for p in root.findall("produto"):
-            if p.find("nome").text == nome:
-                root.remove(p)
-                tree.write(XML_FILE, encoding="utf-8", xml_declaration=True)
-                return "Produto removido com sucesso."
-
-        return "Produto não encontrado."
-
-# Definição e arranque do servidor SOAP
-application = Application([CatalogoService], tns='catalogo.soap',
-                          in_protocol=Soap11(validator='lxml'),
-                          out_protocol=Soap11())
-
-if __name__ == '__main__':
-    from wsgiref.simple_server import make_server
-    print("SOAP server disponível em http://0.0.0.0:8000")
-    server = make_server('0.0.0.0', 8000, WsgiApplication(application))
-    server.serve_forever()
-
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
 
 
 
