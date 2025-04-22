@@ -70,15 +70,12 @@ def importar_xml():
         return jsonify({"erro": f"Erro ao importar XML: {str(e)}"}), 500
 @app.route("/exportar/json", methods=["GET"])
 def exportar_json():
-    with open("produtos.json") as f:
-        produtos = json.load(f)
-    return jsonify(produtos)
+    return jsonify(esteroides)
 
 @app.route("/exportar/xml", methods=["GET"])
 def exportar_xml():
     try:
-        with open("produtos.json", "r", encoding="utf-8") as f:
-            produtos = json.load(f)
+        produtos = esteroides
 
         root = ET.Element("produtos")
         for p in produtos:
@@ -86,8 +83,12 @@ def exportar_xml():
             for chave, valor in p.items():
                 ET.SubElement(produto_elem, chave).text = str(valor)
 
-        xml_str = ET.tostring(root, encoding="utf-8")
-        return Response(xml_str, mimetype="application/xml")
+        rough_string = ET.tostring(root, 'utf-8')
+        reparsed = minidom.parseString(rough_string)
+        pretty_xml = reparsed.toprettyxml(indent="  ")
+
+        return Response(pretty_xml, mimetype='application/xml')
+
 
     except Exception as e:
         print("🛑 ERRO NO EXPORTAR XML:", e)
