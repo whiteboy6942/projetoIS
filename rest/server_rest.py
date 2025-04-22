@@ -1,10 +1,13 @@
+# Importação de bibliotecas necessárias
 from flask import Flask, jsonify, request, Response
 import json
 import xml.etree.ElementTree as ET
+from xml.dom import minidom  
 
+# Criação da aplicação Flask
 app = Flask(__name__)
 
-# Base de dados simulada
+# Base de dados simulada (inicial) com esteroides
 esteroides = [
     {"nome": "Dianabol", "preco": 45.0, "categoria": "Oral", "em_stock": True},
     {"nome": "Deca-Durabolin", "preco": 60.0, "categoria": "Injetável", "em_stock": False},
@@ -14,16 +17,22 @@ esteroides = [
     {"nome": "Sustanon 250", "preco": 65.0, "categoria": "Injetável", "em_stock": True}
 ]
 
+# ROTAS PRINCIPAIS (CRUD)
+
+
+# GET - Lista esteroides
 @app.route("/esteroides", methods=["GET"])
 def listar_esteroides():
     return jsonify(esteroides)
 
+#  POST - Adiciona novo esteroide
 @app.route("/esteroides", methods=["POST"])
 def adicionar_esteroide():
     novo = request.get_json()
     esteroides.append(novo)
     return jsonify({"mensagem": f"Esteroide '{novo['nome']}' adicionado com sucesso!"}), 200
 
+# PUT - Atualiza esteroide por nome
 @app.route("/esteroides/<string:nome>", methods=["PUT"])
 def atualizar_esteroide(nome):
     dados = request.get_json()
@@ -33,22 +42,29 @@ def atualizar_esteroide(nome):
             return jsonify({"mensagem": f"Esteroide '{nome}' atualizado com sucesso."}), 200
     return jsonify({"erro": f"Esteroide '{nome}' não encontrado."}), 404
 
+# DELETE - Remove esteroide por nome
 @app.route("/esteroides/<string:nome>", methods=["DELETE"])
 def remover_esteroide(nome):
     global esteroides
     esteroides = [e for e in esteroides if e["nome"].lower() != nome.lower()]
     return jsonify({"mensagem": f"Esteroide '{nome}' removido com sucesso."}), 200
 
+
+# IMPORTAÇÃO DE DADOS
+
+
+# Importar dados do ficheiro produtos.json (lado do servidor)
 @app.route("/importar/json", methods=["POST"])
 def importar_json():
     try:
         with open("produtos.json", "r") as f:
-                        dados = json.load(f)
-            esteroides.extend(dados)
+            dados = json.load(f)
+        esteroides.extend(dados)
         return jsonify({"mensagem": "Dados importados com sucesso a partir de JSON."}), 200
     except Exception as e:
         return jsonify({"erro": f"Erro ao importar JSON: {str(e)}"}), 500
 
+# Importar dados do ficheiro produtos.xml (lado do servidor)
 @app.route("/importar/xml", methods=["POST"])
 def importar_xml():
     try:
@@ -68,10 +84,17 @@ def importar_xml():
         return jsonify({"mensagem": "Dados importados com sucesso a partir de XML."}), 200
     except Exception as e:
         return jsonify({"erro": f"Erro ao importar XML: {str(e)}"}), 500
+
+
+# EXPORTAÇÃO DE DADOS
+
+
+# Exporta os dados atuais como JSON
 @app.route("/exportar/json", methods=["GET"])
 def exportar_json():
     return jsonify(esteroides)
 
+# Exporta os dados atuais como XML, bem formatado
 @app.route("/exportar/xml", methods=["GET"])
 def exportar_xml():
     try:
@@ -89,14 +112,13 @@ def exportar_xml():
 
         return Response(pretty_xml, mimetype='application/xml')
 
-
     except Exception as e:
         print("🛑 ERRO NO EXPORTAR XML:", e)
         return {"erro": str(e)}, 500
 
 
+# EXECUTA A APLICAÇÃO
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
-
 
