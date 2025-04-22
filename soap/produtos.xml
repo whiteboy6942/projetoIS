@@ -1,0 +1,42 @@
+ GNU nano 7.2                                                                             produtos.xml
+<?xml version='1.0' encoding='utf-8'?>
+<produtos>
+  <produto>
+    <nome>Dianabol</nome>
+    <preco>45.0</preco>
+    <categoria>Bulking</categoria>
+    <em_stock>10</em_stock>
+  </produto>
+  <produto>
+    <nome>Winstrol</nome>
+    <preco>60.0</preco>
+    <categoria>Cutting</categoria>
+    <em_stock>8</em_stock>
+  </produto>
+  <produto>
+    <nome>Deca Durabolin</nome>
+    <preco>80.0</preco>
+    <categoria>Massa</categoria>
+    <em_stock>5</em_stock>
+  </produto>
+  <produto>
+    <nome>Testosterona Enantato</nome>
+    <preco>70.0</preco>
+    <categoria>Base</categoria>
+    <em_stock>15</em_stock>
+  </produto>
+  <produto>
+    <nome>Trenbolona</nome>
+    <preco>100.0</preco>
+    <categoria>Avançado</categoria>
+    <em_stock>4</em_stock>
+  </produto>
+  <produto>
+    <nome>Oxandrolona</nome>
+    <preco>55.0</preco>
+    <categoria>Definição</categoria>
+    <em_stock>9</em_stock>
+  </produto>
+</produtos>
+
+
