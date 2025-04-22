@@ -1,0 +1,39 @@
+[
+  {
+    "nome": "Dianabol",
+    "preco": 45.0,
+    "categoria": "Oral",
+    "em_stock": true
+  },
+  {
+    "nome": "Winstrol",
+    "preco": 50.0,
+    "categoria": "Oral",
+    "em_stock": true
+  },
+  {
+    "nome": "Trembolona",
+    "preco": 70.0,
+    "categoria": "Injetável",
+    "em_stock": false
+  },
+  {
+    "nome": "Sustanon 250",
+    "preco": 65.0,
+    "categoria": "Injetável",
+    "em_stock": true
+  },
+  {
+    "nome": "Deca-Durabolin",
+    "preco": 60.0,
+    "categoria": "Injetável",
+    "em_stock": false
+  },
+  {
+    "nome": "Anavar",
+    "preco": 55.0,
+    "categoria": "Oral",
+    "em_stock": true
+  }
+]
+
